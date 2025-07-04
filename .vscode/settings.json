@@ -1,0 +1,12 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "CMC",
+            "database": "./cryptocurrency_dataset.db"
+        }
+    ],
+    "postman.settings.dotenv-detection-notification-visibility": false,
+    "editor.fontSize": 12
+}
