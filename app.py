@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 """
-# Welcome to Xentyyy!
+# Welcome to Xenty!
 """
 
 APP_DESCRIPTION
