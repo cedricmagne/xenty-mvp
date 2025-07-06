@@ -31,3 +31,26 @@ jobs:
       - name: Push Docker image
         run: |
           docker push ghcr.io/${{ github.repository }}:latest
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          script: |
+            echo "🔐 Logging into ghcr.io on the VPS..."
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+  
+            echo "🛑 Stopping existing container (if any)..."
+            docker stop xenty || true && docker rm xenty || true
+  
+            echo "⬇️ Pulling latest image..."
+            docker pull ghcr.io/${{ github.repository }}:latest
+  
+            echo "🚀 Starting new container..."
+            docker run -d \
+              --name xenty \
+              -p 80:8501 \
+              -v .:/app \
+              ghcr.io/${{ github.repository }}:latest
