@@ -57,7 +57,7 @@ jobs:
             echo "🚀 Starting new container..."
             docker run -d \
               --name xenty \
+              --env-file $HOME/xenty/.env \
               -p 8501:8501 \
-              -v /home/ubuntu/xenty/data:/app/data \
-              -env-file /home/ubuntu/xenty/.env \
+              -v $HOME/xenty/data:/app/data \
               ghcr.io/${{ github.repository }}:latest
