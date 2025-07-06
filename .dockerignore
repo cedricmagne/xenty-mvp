@@ -7,3 +7,8 @@ __db__
 .gitignore
 .python-version
 .vscode
+.devcontainer
+.dockerignore
+.github
+Dockerfile
+README.md

@@ -44,6 +44,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           script: |
+
             echo "🔐 Logging into ghcr.io on the VPS..."
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
   
@@ -57,5 +58,6 @@ jobs:
             docker run -d \
               --name xenty \
               -p 8501:8501 \
-              -v .:/app \
+              -v ~/xenty/data:/app/data \
+              -env-file ~/xenty/.env \
               ghcr.io/${{ github.repository }}:latest
