@@ -58,6 +58,6 @@ jobs:
             docker run -d \
               --name xenty \
               -p 8501:8501 \
-              -v ~/xenty/data:/app/data \
-              -env-file ~/xenty/.env \
+              -v /home/ubuntu/xenty/data:/app/data \
+              -env-file /home/ubuntu/xenty/.env \
               ghcr.io/${{ github.repository }}:latest
