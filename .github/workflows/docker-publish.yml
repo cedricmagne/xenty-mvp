@@ -59,5 +59,6 @@ jobs:
               --name xenty \
               --env-file $HOME/xenty/.env \
               --network caddy_proxy \
+              --restart unless-stopped \
               -v $HOME/xenty/data:/app/data \
               ghcr.io/${{ github.repository }}:latest

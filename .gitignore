@@ -11,3 +11,4 @@ wheels/
 
 __db__
 .env
+data/

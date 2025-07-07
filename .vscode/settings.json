@@ -4,7 +4,7 @@
             "previewLimit": 50,
             "driver": "SQLite",
             "name": "CMC",
-            "database": "./cryptocurrency_dataset.db"
+            "database": "./data/xenty.db"
         }
     ],
     "postman.settings.dotenv-detection-notification-visibility": false,

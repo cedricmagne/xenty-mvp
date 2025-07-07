@@ -7,9 +7,7 @@ import logging
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
-# Import environment variables module (which auto-loads .env)
-from utils.env_loader import get_env_var
-from utils.data_loader import load_data
+from utils.data_loader import DataLoader
 
 # Set page title
 st.set_page_config(page_title="Dataset Visualization", layout="wide")
@@ -20,8 +18,9 @@ st.write("This page allows you to explore and analyze the crypto projects datase
 
 # Load the data using the centralized data loader
 
-# Load the data
-df = load_data()
+# Create a loader instance using the default data source (sqlite)
+loader = DataLoader()
+df = loader.load()
 
 if df is not None:
     # Display basic information
@@ -34,24 +33,103 @@ if df is not None:
     with col2:
         st.metric("Number of Features", df.shape[1])
     
-    # Data preview with options
-    st.subheader("Data Preview")
+    # Data preview with filtering options
+    st.subheader("Data Preview and Filtering")
     
     # Add tabs for different views
     tab1, tab2, tab3 = st.tabs(["Data Sample", "Column Information", "Statistics"])
     
     with tab1:
-        # Display options in a single row
-        col1, col2 = st.columns([1, 2])
-        with col1:
-            sample_size = st.selectbox("Select sample size", [10, 50, min(100, len(df))], index=0)
-        with col2:
-            sample_method = st.radio("Sampling method", ["Top rows", "Random sample"], horizontal=True)
+        # Initialize filtered dataframe
+        filtered_df = df.copy()
         
-        if sample_method == "Top rows":
-            st.dataframe(df.head(sample_size), use_container_width=True)
-        else:
-            st.dataframe(df.sample(sample_size), use_container_width=True)
+        # Controls in a single row
+        col1, col2, col3, col4 = st.columns([1, 1, 1, 2])
+        
+        with col1:
+            # Sample size selector
+            sample_size = st.selectbox("Rows to display", [10, 50, min(100, len(filtered_df))], index=0)
+            
+        with col2:
+            # Column selection dropdown with count display
+            if 'selected_columns' not in st.session_state:
+                st.session_state.selected_columns = df.columns.tolist()
+            
+            # Create a label that shows the count of selected columns
+            column_count = len(st.session_state.selected_columns)
+            total_count = len(df.columns)
+            column_label = f"Columns ({column_count}/{total_count})"
+            
+            # Handle column selection with a selectbox
+            def handle_column_selection():
+                if st.session_state.column_action == "[Select All]":
+                    st.session_state.selected_columns = df.columns.tolist()
+                elif st.session_state.column_action == "[Deselect All]":
+                    st.session_state.selected_columns = []
+                elif st.session_state.column_action not in ["[Choose columns...]", None]:
+                    # Toggle the selected column
+                    col = st.session_state.column_action
+                    if col in st.session_state.selected_columns:
+                        st.session_state.selected_columns.remove(col)
+                    else:
+                        st.session_state.selected_columns.append(col)
+                    
+                # Reset the dropdown to default state
+                st.session_state.column_action = "[Choose columns...]"
+            
+            # Create dropdown options
+            column_options = ["[Choose columns...]", "[Select All]", "[Deselect All]"] + df.columns.tolist()
+            
+            # Initialize the session state for column action if needed
+            if 'column_action' not in st.session_state:
+                st.session_state.column_action = "[Choose columns...]"
+                
+            # Display the selectbox
+            st.selectbox(
+                column_label,
+                options=column_options,
+                key="column_action",
+                on_change=handle_column_selection,
+                format_func=lambda x: x if x in ["[Choose columns...]", "[Select All]", "[Deselect All]"] 
+                                      else f"{'✓ ' if x in st.session_state.selected_columns else '  '}{x}"
+            )
+            
+            # Use the selected columns from session state
+            selected_columns = st.session_state.selected_columns
+            
+            # Ensure we have at least one column selected
+            if not selected_columns:
+                selected_columns = [df.columns[0]]
+                st.session_state.selected_columns = selected_columns
+                
+        with col3:
+            search_col = st.selectbox("Search in", ["Any column"] + df.columns.tolist())
+            
+        with col4:
+            search_term = st.text_input("Search term")
+        
+        if search_term:
+            if search_col == "Any column":
+                # Search in any string column
+                mask = pd.Series(False, index=df.index)
+                for col in df.select_dtypes(include=['object']).columns:
+                    mask = mask | df[col].astype(str).str.contains(search_term, case=False, na=False)
+                filtered_df = filtered_df[mask]
+            else:
+                # Search in specific column
+                filtered_df = filtered_df[filtered_df[search_col].astype(str).str.contains(search_term, case=False, na=False)]
+        
+        # Show filtered data
+        st.write(f"Showing {min(sample_size, len(filtered_df))} of {len(filtered_df)} filtered records (from total {len(df)} records)")
+        st.dataframe(filtered_df[selected_columns].head(sample_size), use_container_width=True)
+        
+        # Download filtered data
+        st.download_button(
+            label="Download filtered data as CSV",
+            data=filtered_df[selected_columns].to_csv(index=False).encode('utf-8'),
+            file_name='filtered_crypto_projects.csv',
+            mime='text/csv',
+        )
     
     with tab2:
         # Column information
@@ -90,55 +168,6 @@ if df is not None:
             st.dataframe(df[numeric_cols].describe(), use_container_width=True)
         else:
             st.write("No numerical columns found in the dataset.")
-    
-    # Advanced filtering
-    st.header("Data Filtering")
-    
-    # Select columns to display
-    st.subheader("Select Columns to Display")
-    all_columns = st.checkbox("Select all columns", value=True)
-    
-    if all_columns:
-        selected_columns = df.columns.tolist()
-    else:
-        selected_columns = st.multiselect("Choose columns", df.columns.tolist(), default=df.columns[:5].tolist())
-    
-    # Text search filter
-    st.subheader("Search in Dataset")
-    search_col, search_term = None, None
-    
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        search_col = st.selectbox("Search column", ["Any column"] + df.columns.tolist())
-    with col2:
-        search_term = st.text_input("Search term")
-    
-    # Filter the dataframe based on search
-    filtered_df = df.copy()
-    
-    if search_term:
-        if search_col == "Any column":
-            # Search in any string column
-            mask = pd.Series(False, index=df.index)
-            for col in df.select_dtypes(include=['object']).columns:
-                mask = mask | df[col].astype(str).str.contains(search_term, case=False, na=False)
-            filtered_df = filtered_df[mask]
-        else:
-            # Search in specific column
-            filtered_df = filtered_df[filtered_df[search_col].astype(str).str.contains(search_term, case=False, na=False)]
-    
-    # Show filtered data
-    st.subheader("Filtered Data")
-    st.write(f"Showing {len(filtered_df)} of {len(df)} records")
-    st.dataframe(filtered_df[selected_columns], use_container_width=True)
-    
-    # Download filtered data
-    st.download_button(
-        label="Download filtered data as CSV",
-        data=filtered_df[selected_columns].to_csv(index=False).encode('utf-8'),
-        file_name='filtered_crypto_projects.csv',
-        mime='text/csv',
-    )
     
     # Data visualization section
     st.header("Data Visualization")
