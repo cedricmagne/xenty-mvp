@@ -1,10 +1,9 @@
-import os
 import joblib
 import pandas as pd
-import numpy as np
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, Optional
 import logging
 from pathlib import Path
+from utils.clusters import engagement_clusters_4
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -30,12 +29,7 @@ class EngagementKMeansPredictor:
             
         self.scaler = None
         self.kmeans_model = None
-        self.cluster_labels = {
-            0: "Low Engagement",
-            1: "Moderate Engagement",
-            2: "High Engagement", 
-            3: "Very High Engagement"
-        }
+        self.cluster_labels = {k: v["cluster_label"] for k, v in engagement_clusters_4.items()}
         
     def load_models(self) -> bool:
         """
@@ -160,6 +154,7 @@ class EngagementKMeansPredictor:
         Returns:
             Dict: Summary statistics and insights
         """
+
         if tweets_df.empty:
             return {}
             
@@ -192,6 +187,10 @@ def filter_valid_tweets(tweets_data: Dict) -> Dict:
     
     for tweet_id, tweet_info in tweets_data.items():
         try:
+
+            # Skip retweets/reposts as they don't have original interaction data
+            if 'RT @' in tweet_info.get('full_text', ''):
+                continue
 
             # Skip tweets without views but with interactions
             # Convert string values to integers with safe fallback

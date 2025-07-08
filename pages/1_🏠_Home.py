@@ -11,7 +11,7 @@ from constants.config import APP_TITLE, APP_DESCRIPTION
 st.set_page_config(
     page_title=APP_TITLE,
     page_icon=":world_map:️",
-    layout="wide",
+    layout="centered",
 )
 
 """

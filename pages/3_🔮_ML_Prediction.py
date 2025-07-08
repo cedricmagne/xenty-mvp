@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.INFO)
 from utils.twitter import TwitterScraper
 from utils.pipeline import EngagementKMeansPredictor, filter_valid_tweets
 from utils.init import *  # Initialize environment and logging
+from utils.clusters import engagement_clusters_4
 
 # Set page title
 st.set_page_config(page_title="Twitter Engagement Analysis", layout="wide")
@@ -109,10 +110,14 @@ if submit_button and screen_name:
                     
                     # Display engagement analysis results
                     st.header("📊 Engagement Analysis Results")
+
+                    st.metric("Dominant Cluster", f"{engagement_clusters_4[0]['cluster_color']} {summary['dominant_cluster']}")
+
+                    st.write(engagement_clusters_4[0]['cluster_description'])
                     
                     # Account Overview
                     st.subheader("Account Overview")
-                    col1, col2, col3, col4 = st.columns(4)
+                    col1, col2, col3 = st.columns(3)
                     
                     with col1:
                         st.metric("Total Tweets Analyzed", summary['total_tweets'])
@@ -120,8 +125,6 @@ if submit_button and screen_name:
                         st.metric("Total Views", f"{summary['total_views']:,}")
                     with col3:
                         st.metric("Total Likes", f"{summary['total_likes']:,}")
-                    with col4:
-                        st.metric("Dominant Cluster", summary['dominant_cluster'])
                     
                     # Engagement Ratios
                     st.subheader("Average Engagement Ratios")
