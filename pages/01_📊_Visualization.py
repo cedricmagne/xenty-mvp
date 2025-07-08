@@ -10,7 +10,10 @@ logging.basicConfig(level=logging.INFO)
 from utils.data_loader import DataLoader
 
 # Set page title
-st.set_page_config(page_title="Dataset Visualization", layout="wide")
+st.set_page_config(
+    page_title="Dataset Visualization",
+    layout="wide",
+    initial_sidebar_state="collapsed")
 
 # Page header
 st.title("Crypto Projects Dataset Exploration")

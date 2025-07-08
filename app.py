@@ -1,5 +1,4 @@
 import streamlit as st
-import os
 import logging
 
 # Configure logging
@@ -26,5 +25,3 @@ If you have any questions, checkout our [Github](https://github.com/cedric-alyra
 project](https://www.kaggle.com/competitions/xenty).
 
 """
-
-left, right = st.columns(2)
