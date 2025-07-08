@@ -1,5 +1,4 @@
 import streamlit as st
-import time
 
 def show_message(message_type, message):
     """

@@ -1,1 +1,0 @@
-{"model_type": "KMeans", "scaler_type": "StandardScaler", "num_features": 3, "features": ["likes_per_views", "retweets_per_views", "replies_per_views"], "num_clusters": 3, "engagement_levels": ["Faible", "Fort", "Moyen"]}

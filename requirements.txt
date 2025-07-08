@@ -10,6 +10,7 @@ plotly==6.2.0
 
 # Machine learning and model serving
 tensorflow==2.19.0
+joblib==1.5.1
 
 # Web app and UI
 streamlit==1.46.1

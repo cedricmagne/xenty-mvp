@@ -464,7 +464,7 @@ class TwitterScraper:
                                             user = user_results.get('result', {})
                                                 
                                             if user:
-                                                self.update_user_result_to_db(user)
+                                                self.upsert_user_result_to_db(user)
                                             else:
                                                 self.logger.warning(f"User data not found for tweet: {tweet_id}")
                                     except Exception as e:
