@@ -202,13 +202,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- **GitHub**: [https://github.com/cedric-alyra/xenty](https://github.com/cedric-alyra/xenty)
-- **Kaggle Competition**: [https://www.kaggle.com/competitions/xenty](https://www.kaggle.com/competitions/xenty)
-- **Dataset**: [Crypto Twitter Dataset](https://www.kaggle.com/datasets/mc3labs/crypto-twitter-dataset-5k-accounts-csv)
+- **GitHub**: [https://github.com/cedricmagne/xenty](https://github.com/cedricmagne/xenty)
+- **Kaggle**: [Crypto Twitter Dataset](https://www.kaggle.com/datasets/mc3labs/crypto-twitter-dataset-5k-accounts-csv)
+- **Dashboard**: [https://xenty.smartt.dev](https://xenty.smartt.dev)
 
 ## 👥 Authors
 
-- **Cédric** - *Initial work* - [cedric-alyra](https://github.com/cedric-alyra)
+- **Cédric** - *Initial work* - [cedricmagne](https://github.com/cedricmagne)
 
 ## 🙏 Acknowledgments
 
