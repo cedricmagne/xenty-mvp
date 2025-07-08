@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Custom tag for the Docker image'
+        required: false
+        default: 'latest'
+        type: string
+
 
 jobs:
   build-and-push:
