@@ -58,16 +58,25 @@ class EngagementKMeansPredictor:
     
     def calculate_engagement_features(self, tweets_data: Dict) -> pd.DataFrame:
         """
-        Calculate engagement features from tweets data.
+        Calculate engagement features from tweets data using aggregated metrics across all tweets.
+        Similar to the notebook approach with calculate_view_normalized_metric.
         
         Args:
             tweets_data (Dict): Dictionary containing tweet data
             
         Returns:
-            pd.DataFrame: DataFrame with engagement features
+            pd.DataFrame: DataFrame with aggregated engagement features
         """
-        features_list = []
+        logger = logging.getLogger(__name__)
         
+        # Initialize totals
+        total_likes = 0
+        total_retweets = 0
+        total_replies = 0
+        total_views = 0
+        valid_tweets_count = 0
+        
+        # Aggregate metrics across all tweets
         for tweet_id, tweet_info in tweets_data.items():
             try:
                 # Convert string values to integers with safe fallback
@@ -80,31 +89,39 @@ class EngagementKMeansPredictor:
                     # Skip tweets with invalid metric data
                     continue
                 
-                # Avoid division by zero
+                # Only include tweets with views > 0
                 if views > 0:
-                    likes_per_views = likes / views
-                    retweets_per_views = retweets / views
-                    replies_per_views = replies / views
-                else:
-                    # Skip tweets with no views
-                    continue
+                    total_views += views
+                    total_likes += likes
+                    total_retweets += retweets
+                    total_replies += replies
+                    valid_tweets_count += 1
                     
-                features_list.append({
-                    'tweet_id': tweet_id,
-                    'likes_per_views': likes_per_views,
-                    'retweets_per_views': retweets_per_views,
-                    'replies_per_views': replies_per_views,
-                    'views': views,
-                    'likes': likes,
-                    'retweets': retweets,
-                    'replies': replies
-                })
-                
             except Exception as e:
                 logger.warning(f"Error processing tweet {tweet_id}: {e}")
                 continue
-                
-        return pd.DataFrame(features_list)
+        
+        # Calculate view-normalized metrics
+        if total_views > 0:
+            likes_per_views = total_likes / total_views
+            retweets_per_views = total_retweets / total_views
+            replies_per_views = total_replies / total_views
+        else:
+            likes_per_views = 0
+            retweets_per_views = 0
+            replies_per_views = 0
+            
+        # Return single row DataFrame with aggregated features
+        return pd.DataFrame([{
+            'likes_per_views': likes_per_views,
+            'retweets_per_views': retweets_per_views,
+            'replies_per_views': replies_per_views,
+            'total_views': total_views,
+            'total_likes': total_likes,
+            'total_retweets': total_retweets,
+            'total_replies': total_replies,
+            'valid_tweets_count': valid_tweets_count
+        }])
     
     def predict_engagement_clusters(self, tweets_data: Dict) -> Optional[pd.DataFrame]:
         """
@@ -143,35 +160,6 @@ class EngagementKMeansPredictor:
         df['cluster_label'] = df['cluster'].map(self.cluster_labels)
         
         return df
-    
-    def get_account_engagement_summary(self, tweets_df: pd.DataFrame) -> Dict:
-        """
-        Generate an engagement summary for the account.
-        
-        Args:
-            tweets_df (pd.DataFrame): DataFrame with tweet features and clusters
-            
-        Returns:
-            Dict: Summary statistics and insights
-        """
-
-        if tweets_df.empty:
-            return {}
-            
-        summary = {
-            'total_tweets': len(tweets_df),
-            'avg_likes_per_views': tweets_df['likes_per_views'].mean(),
-            'avg_retweets_per_views': tweets_df['retweets_per_views'].mean(),
-            'avg_replies_per_views': tweets_df['replies_per_views'].mean(),
-            'total_views': tweets_df['views'].sum(),
-            'total_likes': tweets_df['likes'].sum(),
-            'total_retweets': tweets_df['retweets'].sum(),
-            'total_replies': tweets_df['replies'].sum(),
-            'cluster_distribution': tweets_df['cluster_label'].value_counts().to_dict(),
-            'dominant_cluster': tweets_df['cluster_label'].mode().iloc[0] if not tweets_df.empty else None
-        }
-        
-        return summary
 
 def filter_valid_tweets(tweets_data: Dict) -> Dict:
     """

@@ -83,14 +83,12 @@ with st.form("twitter_form"):
 # Process the form submission outside the form context
 if submit_button and screen_name:
         tweets_data = get_twitter_data(screen_name)
-        
-        
+
         if tweets_data:
             # Clean the screen name (remove @ if present)
             if screen_name.startswith('@'):
                 screen_name = screen_name[1:]
-            st.success(f"Successfully retrieved data for @{screen_name}")
-            
+
             # Filter valid tweets for analysis
             filtered_tweets = filter_valid_tweets(tweets_data)
             
@@ -103,71 +101,50 @@ if submit_button and screen_name:
                 # Perform engagement clustering
                 with st.spinner("Analyzing engagement patterns..."):
                     results_df = predictor.predict_engagement_clusters(filtered_tweets)
+
+                    if results_df.empty:
+                        result = None
+                    else:
+                        result = results_df.iloc[0]
                 
-                if results_df is not None and not results_df.empty:
-                    # Generate account summary
-                    summary = predictor.get_account_engagement_summary(results_df)
+                if result is not None:
                     
                     # Display engagement analysis results
-                    st.header("📊 Engagement Analysis Results")
+                    st.header("📊 Engagement Analysis")
 
-                    st.metric("Dominant Cluster", f"{engagement_clusters_4[0]['cluster_color']} {summary['dominant_cluster']}")
+                    st.metric("Score" ,f"{engagement_clusters_4[result['cluster']]['cluster_color']} {engagement_clusters_4[result['cluster']]['cluster_label']}")
 
-                    st.write(engagement_clusters_4[0]['cluster_description'])
+                    st.write(engagement_clusters_4[result['cluster']]['cluster_description'])
                     
                     # Account Overview
                     st.subheader("Account Overview")
                     col1, col2, col3 = st.columns(3)
                     
                     with col1:
-                        st.metric("Total Tweets Analyzed", summary['total_tweets'])
+                        st.metric("Total Tweets Analyzed", result['valid_tweets_count'])
                     with col2:
-                        st.metric("Total Views", f"{summary['total_views']:,}")
+                        st.metric("Total Views", f"{result['total_views']:,}")
                     with col3:
-                        st.metric("Total Likes", f"{summary['total_likes']:,}")
+                        st.metric("Total Likes", f"{result['total_likes']:,}")
                     
                     # Engagement Ratios
                     st.subheader("Average Engagement Ratios")
                     col1, col2, col3 = st.columns(3)
                     
                     with col1:
-                        st.metric("Likes per View", f"{summary['avg_likes_per_views']:.4f}")
+                        st.metric("Likes per View", f"{result['likes_per_views']:.4f}")
                     with col2:
-                        st.metric("Retweets per View", f"{summary['avg_retweets_per_views']:.4f}")
+                        st.metric("Retweets per View", f"{result['retweets_per_views']:.4f}")
                     with col3:
-                        st.metric("Replies per View", f"{summary['avg_replies_per_views']:.4f}")
-                    
-                    # Cluster Distribution Chart
-                    st.subheader("📈 Engagement Cluster Distribution")
-                    cluster_df = pd.DataFrame(list(summary['cluster_distribution'].items()), 
-                                            columns=['Cluster', 'Count'])
-                    
-                    fig_pie = px.pie(cluster_df, values='Count', names='Cluster', 
-                                   title="Distribution of Tweets by Engagement Level")
-                    st.plotly_chart(fig_pie, use_container_width=True)
-                    
-                    # Engagement Features Scatter Plot
-                    st.subheader("🎯 Engagement Features Analysis")
-                    fig_scatter = px.scatter(results_df, 
-                                           x='likes_per_views', 
-                                           y='retweets_per_views',
-                                           size='views',
-                                           color='cluster_label',
-                                           hover_data=['replies_per_views', 'views', 'likes'],
-                                           title="Engagement Patterns: Likes vs Retweets per View")
-                    fig_scatter.update_layout(height=500)
-                    st.plotly_chart(fig_scatter, use_container_width=True)
+                        st.metric("Replies per View", f"{result['replies_per_views']:.4f}")
                     
                     # Individual Tweet Analysis
                     st.subheader("🔍 Individual Tweet Analysis")
+
+                    for tweet_id, row in filtered_tweets.items():
+                        tweet_info = row
                     
-                    # Sort tweets by cluster for better organization
-                    sorted_df = results_df.sort_values(['cluster', 'likes_per_views'], ascending=[True, False])
-                    
-                    for _, row in sorted_df.iterrows():
-                        tweet_info = filtered_tweets[row['tweet_id']]
-                    
-                        with st.expander(f"Tweet (Cluster: {row['cluster_label']}) - Likes/Views: {row['likes_per_views']:.4f}"):
+                        with st.expander(f"Tweet {tweet_id}"):
                             # Tweet content
                             st.markdown(f"**Tweet:** {tweet_info['full_text']}")
                             
@@ -190,28 +167,23 @@ if submit_button and screen_name:
                             st.markdown("**Engagement Ratios:**")
                             col1, col2, col3 = st.columns(3)
                             with col1:
-                                st.write(f"Likes/Views: {row['likes_per_views']:.4f}")
+                                st.write(f"Likes/Views: {row['likes_count'] / int(row['views_count']):.4f}")
                             with col2:
-                                st.write(f"Retweets/Views: {row['retweets_per_views']:.4f}")
+                                st.write(f"Retweets/Views: {row['retweet_count'] / int(row['views_count']):.4f}")
                             with col3:
-                                st.write(f"Replies/Views: {row['replies_per_views']:.4f}")
-                            
-                            # Cluster information
-                            cluster_color = {
-                                "Low Engagement": "🔴",
-                                "Moderate Engagement": "🟡", 
-                                "High Engagement": "🟢",
-                                "Very High Engagement": "🔵"
-                            }
-                            st.markdown(f"**Engagement Level:** {cluster_color.get(row['cluster_label'], '⚪')} {row['cluster_label']}")
+                                st.write(f"Replies/Views: {row['reply_count'] / int(row['views_count']):.4f}")
                             
                             # Comments section
                             if tweet_info.get('comments'):
                                 st.markdown(f"**Comments ({len(tweet_info['comments'])}):**")
-                                for j, comment in enumerate(tweet_info['comments'][:3]):  # Show first 3 comments
-                                    st.markdown(f"• {comment}")
-                                if len(tweet_info['comments']) > 3:
-                                    st.markdown(f"... and {len(tweet_info['comments']) - 3} more comments")
+                                for j, comment in enumerate(tweet_info['comments']):
+                                    bg_color = "#333" if j % 2 == 0 else "#000"
+                                    st.markdown(
+                                        f'<div style="background-color: {bg_color}; padding: 5px; border-radius: 3px;">{comment}</div>', 
+                                        unsafe_allow_html=True
+                                    )
+                                # if len(tweet_info['comments']) > 3:
+                                #     st.markdown(f"... and {len(tweet_info['comments']) - 3} more comments")
                             else:
                                 st.info("No comments found for this tweet.")
                     
