@@ -13,5 +13,4 @@ __db__
 Dockerfile
 README.md
 ./data
-./models/dl
 
