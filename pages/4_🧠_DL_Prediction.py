@@ -15,7 +15,7 @@ from utils.distilbert_sentiment import XentySentimentAnalyzer
 
 @st.cache_resource
 def load_sentiment_analyzer():
-    model_path = "./models/dl/best_distilbert_model.h5"  # relatif au dossier de l'app
+    model_path = "./data/best_distilbert_model.h5"  # relatif au dossier de l'app
     return XentySentimentAnalyzer(model_path)
 
 analyzer = load_sentiment_analyzer()
