@@ -12,3 +12,6 @@ __db__
 .github
 Dockerfile
 README.md
+./data
+./models/dl
+

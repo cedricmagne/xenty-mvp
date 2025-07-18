@@ -77,7 +77,7 @@ def get_twitter_data(screen_name: str) -> Dict:
 
 # Create the input form
 with st.form("twitter_form"):
-    screen_name = st.text_input("Enter Twitter screen name (with or without @)")
+    screen_name = st.text_input("Enter X/Twitter account (with or without @ case sensitive)")
     submit_button = st.form_submit_button("Analyze")
 
 # Process the form submission outside the form context

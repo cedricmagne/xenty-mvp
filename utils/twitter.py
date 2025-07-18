@@ -109,30 +109,6 @@ class TwitterScraper:
                 self.logger.error(f"Response: {response.text}")
             raise
     
-    def get_users(self, user_ids: List[str] = None, usernames: List[str] = None) -> Dict:
-        """Get information about Twitter users by their IDs or usernames.
-        
-        Args:
-            user_ids: List of Twitter user IDs
-            usernames: List of Twitter usernames (without @)
-            
-        Returns:
-            Dictionary containing user information
-            
-        Raises:
-            ValueError: If neither user_ids nor usernames are provided
-        """
-        if not user_ids and not usernames:
-            raise ValueError("Either user_ids or usernames must be provided")
-            
-        params = {}
-        if user_ids:
-            params["users"] = ",".join(user_ids)
-        elif usernames:
-            params["usernames"] = ",".join(usernames)
-            
-        return self._make_request("get-users-v2", params)
-    
     def get_user_tweets(self, user_id: str, count: str = "1", cursor: str = None) -> Dict:
         """Get tweets from a specific user by their Twitter user ID.
         
@@ -154,39 +130,6 @@ class TwitterScraper:
             
         return self._make_request("user-tweets", params)
     
-    def search_tweets(self, query: str, count: str = "20", cursor: str = None) -> Dict:
-        """Search for tweets matching a query.
-        
-        Args:
-            query: Search query string
-            count: Number of tweets to retrieve (default: 20)
-            cursor: Pagination cursor for fetching more results
-            
-        Returns:
-            Dictionary containing search results and pagination information
-        """
-        params = {
-            "query": query,
-            "count": count
-        }
-        
-        if cursor:
-            params["cursor"] = cursor
-            
-        return self._make_request("search", params)
-    
-    def get_tweet_details(self, tweet_id: str) -> Dict:
-        """Get detailed information about a specific tweet.
-        
-        Args:
-            tweet_id: ID of the tweet to retrieve
-            
-        Returns:
-            Dictionary containing tweet details
-        """
-        params = {"tweet_id": tweet_id}
-        return self._make_request("tweet-detail", params)
-    
     def get_user_by_username(self, username: str) -> Dict:
         """Get detailed information about a user by their username.
         
@@ -199,67 +142,6 @@ class TwitterScraper:
         params = {"username": username}
         return self._make_request("user", params)
     
-    def batch_save_users_to_db(self, usernames: List[str], db_path: str = "cryptocurrency_dataset.db", 
-                              table_name: str = "x_cryptos", x_name_column: str = "x_name") -> Dict[str, bool]:
-        """Fetch and save Twitter data for multiple usernames.
-        
-        Args:
-            usernames: List of Twitter usernames (without @)
-            db_path: Path to SQLite database file
-            table_name: Name of the table to update
-            x_name_column: Name of the column containing Twitter usernames
-            
-        Returns:
-            Dictionary mapping usernames to success status
-        """
-        results = {}
-        total = len(usernames)
-        
-        for i, username in enumerate(usernames):
-            self.logger.info(f"Processing {i+1}/{total}: {username}")
-            success = self.save_user_to_db(username, db_path, table_name, x_name_column)
-            results[username] = success
-            
-        success_count = sum(1 for success in results.values() if success)
-        self.logger.info(f"Completed batch processing: {success_count}/{total} successful")
-        
-        return results
-    
-    def batch_get_users(self, user_ids: List[str] = None, usernames: List[str] = None, 
-                       batch_size: int = 100) -> List[Dict]:
-        """Get information about multiple users in batches to respect API limits.
-        
-        Args:
-            user_ids: List of Twitter user IDs
-            usernames: List of Twitter usernames
-            batch_size: Number of users to request in each batch (default: 100)
-            
-        Returns:
-            List of user information dictionaries
-        """
-        if not user_ids and not usernames:
-            raise ValueError("Either user_ids or usernames must be provided")
-            
-        source = user_ids if user_ids else usernames
-        results = []
-        
-        # Process in batches
-        for i in range(0, len(source), batch_size):
-            batch = source[i:i+batch_size]
-            
-            if user_ids:
-                batch_results = self.get_users(user_ids=batch)
-            else:
-                batch_results = self.get_users(usernames=batch)
-                
-            if batch_results and 'data' in batch_results:
-                results.extend(batch_results['data'])
-                
-            # Log progress
-            self.logger.info(f"Processed batch {i//batch_size + 1}/{(len(source)-1)//batch_size + 1}")
-            
-        return results
-        
     def get_tweet_comments_v2(self, tweet_id: str, ranking_mode: str = "Relevance", count: str = "50") -> Dict:
         """Get comments for a specific tweet using the comments-v2 endpoint.
         
@@ -342,7 +224,7 @@ class TwitterScraper:
             self.logger.error(f"Error saving user data to database: {e}")
             return False
         
-    def get_tweets_with_comments(self, usernames: List[str], tweet_count: str = "1", 
+    def get_tweets_with_comments(self, usernames: List[str], tweet_count: str = "20", 
                                comment_count: str = "50", ranking_mode: str = "Relevance",
                                table_name: str = "x_cryptos") -> Dict[str, bool]:
         """Get tweets and their comments for a list of usernames and save to database.

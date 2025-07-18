@@ -1,4 +1,7 @@
+import os
+import json
 import joblib
+import sqlite3
 import pandas as pd
 from typing import Dict, Optional
 import logging
@@ -205,5 +208,57 @@ def filter_valid_tweets(tweets_data: Dict) -> Dict:
             logger.warning(f"Error filtering tweet {tweet_id}: {e}")
             continue
             
-    logger.info(f"Filtered {len(tweets_data)} tweets down to {len(filtered_tweets)} valid tweets")
+    #logger.info(f"Filtered {len(tweets_data)} tweets down to {len(filtered_tweets)} valid tweets")
     return filtered_tweets
+
+# Fonction pour modifier le type de l'attribut views_count string -> int
+def cast_views_count_to_int(post_json_str):
+    if pd.isna(post_json_str):
+        return post_json_str
+    
+    # Charger le JSON
+    try:
+        posts_dict = json.loads(post_json_str)
+    except json.JSONDecodeError:
+        # Si le JSON est invalide, retourner la valeur originale
+        return post_json_str
+    
+    # Parcourir chaque tweet dans le dictionnaire
+    for _, tweet_data in posts_dict.items():
+        if 'views_count' in tweet_data:
+            tweet_data['views_count'] = int(tweet_data.pop('views_count'))
+    
+    # Reconvertir en JSON string
+    return posts_dict
+
+def get_dl_training_data():
+    
+    db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "xenty.db")
+    conn = sqlite3.connect(db_path)
+    query = "SELECT screen_name, posts FROM x_cryptos WHERE posts IS NOT NULL"
+    df = pd.read_sql_query(query, conn)
+    conn.close()
+    print("📊 Dataset créé avec", len(df), "comptes crypto")
+    df['posts'] = df['posts'].apply(cast_views_count_to_int)
+    df_filtered = df.copy()
+    
+    # Appliquer un filtre sur les tweets
+    df_filtered["filtered_posts"] = df_filtered["posts"].apply(filter_valid_tweets)
+
+    # Get reply count (comments) for each post
+    df_filtered['total_replies_original'] = df_filtered['posts'].apply(
+        lambda x: sum(len(tweet_data.get('comments', [])) for tweet_data in x.values())
+    )
+
+    # Get reply count (comments) for each post
+    df_filtered['total_replies_filtered'] = df_filtered['filtered_posts'].apply(
+        lambda x: sum(len(tweet_data.get('comments', [])) for tweet_data in x.values())
+    )
+
+    # Remove all row with total_replies_filtered = 0
+    df_filtered = df_filtered[df_filtered['total_replies_filtered'] > 0].reset_index(drop=True)
+
+    return df_filtered
+    
+    
+    

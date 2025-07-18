@@ -1,3 +1,44 @@
+engagement_clusters_2 = {
+    0: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🔴",
+        "cluster_description": """
+            TBD
+            """
+    },
+    1: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟢",
+        "cluster_description": """
+            TBD
+            """
+    }
+}
+
+engagement_clusters_3 = {
+    0: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟡",
+        "cluster_description": """
+            TBD
+            """
+    },
+    1: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟢",
+        "cluster_description": """
+            TBD
+            """
+    },
+    2: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🔴",
+        "cluster_description": """
+            TBD
+            """
+    }
+}
+
 engagement_clusters_4 = {
     0: { 
         "cluster_label": "Engagement Équilibré",
@@ -29,6 +70,200 @@ engagement_clusters_4 = {
         "cluster_description": """
             Comptes avec les ratios d'engagement les plus élevés, particulièrement en retweets.\n
             Probablement des comptes d'actualités crypto, d'analyses ou de contenus très partagés par la communauté.\n
+            """
+    }
+}
+
+engagement_clusters_5 = {
+    0: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟡",
+        "cluster_description": """
+            TBD
+            """
+    },
+    1: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟢",
+        "cluster_description": """
+            TBD
+            """
+    },
+    2: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🔴",
+        "cluster_description": """
+            TBD
+            """
+    },
+    3: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🔵",
+        "cluster_description": """
+            TBD
+            """
+    },
+    4: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟣",
+        "cluster_description": """
+            TBD
+            """
+    }
+}
+
+engagement_clusters_6 = {
+    0: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟡",
+        "cluster_description": """
+            TBD
+            """
+    },
+    1: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟢",
+        "cluster_description": """
+            TBD
+            """
+    },
+    2: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🔴",
+        "cluster_description": """
+            TBD
+            """
+    },
+    3: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🔵",
+        "cluster_description": """
+            TBD
+            """
+    },
+    4: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟣",
+        "cluster_description": """
+            TBD
+            """
+    },
+    5: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟠",
+        "cluster_description": """
+            TBD
+            """
+    }
+}
+
+engagement_clusters_7 = {
+    0: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟡",
+        "cluster_description": """
+            TBD
+            """
+    },
+    1: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟢",
+        "cluster_description": """
+            TBD
+            """
+    },
+    2: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🔴",
+        "cluster_description": """
+            TBD
+            """
+    },
+    3: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🔵",
+        "cluster_description": """
+            TBD
+            """
+    },
+    4: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟣",
+        "cluster_description": """
+            TBD
+            """
+    },
+    5: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟠",
+        "cluster_description": """
+            TBD
+            """
+    },
+    6: { 
+        "cluster_label": "TBD",
+        "cluster_color": "⚫",
+        "cluster_description": """
+            TBD
+            """
+    }
+}
+
+engagement_clusters_8 = {
+    0: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟡",
+        "cluster_description": """
+            TBD
+            """
+    },
+    1: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟢",
+        "cluster_description": """
+            TBD
+            """
+    },
+    2: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🔴",
+        "cluster_description": """
+            TBD
+            """
+    },
+    3: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🔵",
+        "cluster_description": """
+            TBD
+            """
+    },
+    4: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟣",
+        "cluster_description": """
+            TBD
+            """
+    },
+    5: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🟠",
+        "cluster_description": """
+            TBD
+            """
+    },
+    6: { 
+        "cluster_label": "TBD",
+        "cluster_color": "⚫",
+        "cluster_description": """
+            TBD
+            """
+    },
+    7: { 
+        "cluster_label": "TBD",
+        "cluster_color": "🌈",
+        "cluster_description": """
+            TBD
             """
     }
 }

@@ -12,3 +12,5 @@ wheels/
 __db__
 .env
 data/
+models/dl
+
