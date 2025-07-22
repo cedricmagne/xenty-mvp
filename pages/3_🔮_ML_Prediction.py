@@ -113,18 +113,11 @@ if submit_button and screen_name:
                     st.header(f"📊 Engagement Analysis")
 
                     st.subheader("Means for each cluster")
-                    cluster_centers = predictor.kmeans_model.cluster_centers_
-                    features = ['likes_per_views', 'retweets_per_views', 'replies_per_views']
-                    cluster_means_df = pd.DataFrame(
-                        cluster_centers, 
-                        columns=features,
-                        index=range(len(cluster_centers))
-                    )
-                    #cluster_means_df.index.name = 'cluster'
-
-                    # Add cluster labels
-                    cluster_means_df['cluster_label'] = [engagement_clusters_4[i]['cluster_label'] for i in range(len(cluster_centers))]
-
+                    # Load the CSV file
+                    cluster_means_df = pd.read_csv('models/engagement_kmeans/cluster_means.csv', index_col=0)
+                    # Add cluster labels and format for better readability
+                    cluster_means_df['cluster_label'] = [engagement_clusters_4[i]['cluster_label'] for i in range(len(cluster_means_df))]
+                    
                     st.dataframe(cluster_means_df)
 
                     st.subheader(f"Score for @{screen_name} -- {engagement_clusters_4[result['cluster']]['cluster_color']} {engagement_clusters_4[result['cluster']]['cluster_label']}")
