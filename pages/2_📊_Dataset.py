@@ -8,6 +8,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 from utils.data_loader import DataLoader
+from utils.pipeline import get_dl_training_data
 
 # Set page title
 st.set_page_config(
@@ -30,11 +31,14 @@ if df is not None:
     st.header("Dataset Overview")
     
     # Show dataset shape
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
+    ml_df = get_dl_training_data()
     with col1:
-        st.metric("Number of Records", df.shape[0])
+        st.metric("X/Twitter accounts total", df.shape[0])
     with col2:
-        st.metric("Number of Features", df.shape[1])
+        st.metric("X/Twitter accounts with posts", ml_df.shape[0])
+    with col3:
+        st.metric("X/Twitter comments", ml_df['total_replies_filtered'].sum())
     
     # Data preview with filtering options
     st.subheader("Data Preview and Filtering")
