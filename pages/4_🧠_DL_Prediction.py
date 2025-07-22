@@ -15,7 +15,7 @@ from utils.distilbert_sentiment import XentySentimentAnalyzer
 
 @st.cache_resource
 def load_sentiment_analyzer():
-    model_path = "./data/best_distilbert_model.h5"  # relatif au dossier de l'app
+    model_path = "./data/best_model_bertweet.h5"  # relatif au dossier de l'app
     return XentySentimentAnalyzer(model_path)
 
 analyzer = load_sentiment_analyzer()
@@ -103,6 +103,9 @@ if submit_button and screen_name:
                 comments = tweets_data[tweet_id].get('comments', [])
                     
                 with st.spinner("Analyse du sentiment des commentaires..."):
+
+                    # Clean empty texts
+                    comments = [comment for comment in comments if comment.strip()]
                     
                     # Predict sentiment for all comments
                     sentiment_results = analyzer.predict_sentiment(comments)

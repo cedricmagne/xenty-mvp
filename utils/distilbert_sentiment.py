@@ -1,7 +1,8 @@
 import logging
+import re
 import numpy as np
 import tensorflow as tf
-from transformers import AutoTokenizer, TFDistilBertModel
+from transformers import AutoTokenizer, TFRobertaModel
 from typing import Dict, List, Tuple
 
 # Configure logging
@@ -9,6 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Define sentiment labels
 SENTIMENT_LABELS = ['bearish', 'bullish']
+MODEL_NAME = "vinai/bertweet-base"
 
 class XentySentimentAnalyzer:
     def __init__(self, model_path: str):
@@ -20,10 +22,10 @@ class XentySentimentAnalyzer:
         """
         try:
             # Load the tokenizer
-            self.tokenizer = AutoTokenizer.from_pretrained('distilbert-base-uncased')
+            self.tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False, normalization=True)
             
             # Load the model with custom objects
-            custom_objects = {'TFDistilBertModel': TFDistilBertModel}
+            custom_objects = {'TFRobertaModel': TFRobertaModel}
             self.model = tf.keras.models.load_model(model_path, custom_objects=custom_objects)
             
             logging.info(f"Successfully loaded model from {model_path}")
@@ -31,7 +33,7 @@ class XentySentimentAnalyzer:
             logging.error(f"Error loading model: {e}")
             raise e
     
-    def preprocess_text(self, texts: List[str], max_length: int = 256) -> Dict:
+    def preprocess_text(self, texts: List[str], max_length: int = 64) -> Dict:
         """
         Preprocess text for DistilBERT model.
         
@@ -50,6 +52,43 @@ class XentySentimentAnalyzer:
             return_tensors='tf'
         )
     
+    def preprocess_crypto_text(self, text: str) -> str:
+        """Préprocessing spécifique au domaine crypto"""
+        if not text or len(text.strip()) == 0:
+            return ""
+        
+        text = text.strip()
+        text = re.sub(r"http\S+", "http", text)
+        
+        # Normaliser les termes crypto spécifiques
+        crypto_normalizations = {
+            # Bullish terms
+            r'\bto the moon\b': 'very bullish',
+            r'\bmoon\b': 'bullish rising',
+            r'\brocket\b': 'very bullish',
+            r'\blambo\b': 'extremely bullish',
+            r'\bhodl\b': 'hold bullish',
+            r'\bdiamond hands\b': 'strong hold bullish',
+            r'\bbull run\b': 'very bullish market',
+            r'\bpump\b': 'price rising bullish',
+            r'\bape\b': 'buy bullish',
+            r'\blfg\b': 'lets go bullish',
+            
+            # Bearish terms  
+            r'\brug pull\b': 'scam very bearish',
+            r'\bdump\b': 'crash very bearish',
+            r'\bpaper hands\b': 'weak sell bearish',
+            r'\bbear market\b': 'very bearish market',
+            r'\bcrash\b': 'very bearish falling',
+            r'\brekt\b': 'destroyed very bearish',
+            r'\bfud\b': 'fear bearish'
+        }
+        
+        for pattern, replacement in crypto_normalizations.items():
+            text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+        
+        return text.strip()
+
     def predict_sentiment(self, texts: List[str]) -> List[Tuple[str, float]]:
         """
         Predict sentiment for a list of texts.
@@ -62,6 +101,7 @@ class XentySentimentAnalyzer:
         """
         try:
             # Preprocess the texts
+            texts = [self.preprocess_crypto_text(text) for text in texts]
             inputs = self.preprocess_text(texts)
             
             # Make predictions
