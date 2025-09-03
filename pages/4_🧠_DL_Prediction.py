@@ -3,8 +3,7 @@ import logging
 import json
 import pandas as pd
 import plotly.express as px
-import os
-from typing import Dict, List, Tuple
+from typing import Dict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -19,14 +18,14 @@ def load_sentiment_analyzer():
     return XentySentimentAnalyzer(model_path)
 
 analyzer = load_sentiment_analyzer()
-st.success("Analyseur de sentiment chargé ✅")
+st.success("Sentiment analyzer loaded ✅")
 
 # Set page title
 st.set_page_config(page_title="Comment Sentiment Analysis", layout="wide")
 
 # Page header
 st.title("💬 Comment Sentiment Analysis")
-st.write("Analyse du sentiment des commentaires Twitter à l'aide du Deep Learning.")
+st.write("Analyze the sentiment of Twitter comments using Deep Learning.")
 
 def get_twitter_data(screen_name: str) -> Dict:
     """
@@ -47,14 +46,14 @@ def get_twitter_data(screen_name: str) -> Dict:
             screen_name = screen_name[1:]
             
         # Get tweets with comments
-        with st.spinner(f"Récupération des tweets et commentaires pour @{screen_name}..."):
+        with st.spinner(f"Fetching tweets and comments for @{screen_name}..."):
 
             # Query the database to get the saved tweets
             query = f"SELECT posts FROM x_cryptos WHERE screen_name = ? LIMIT 1"
             result = scraper.conn.cursor().execute(query, (screen_name,)).fetchone()
             
             if not result or not result[0]:
-                st.error(f"Aucun tweet trouvé pour @{screen_name}")
+                st.error(f"No tweets found for @{screen_name}")
                 return None
                 
             # Parse the JSON string from the database
@@ -66,14 +65,14 @@ def get_twitter_data(screen_name: str) -> Dict:
             return tweets_data
             
     except Exception as e:
-        st.error(f"Erreur: {e}")
+        st.error(f"Error: {e}")
         logging.error(f"Error fetching Twitter data: {e}")
         return None
 
 # Create the input form
 with st.form("twitter_form"):
-    screen_name = st.text_input("Entrez un compte X/Twitter (avec ou sans @)")
-    submit_button = st.form_submit_button("Analyser")
+    screen_name = st.text_input("Enter X/Twitter account (with or without @)")
+    submit_button = st.form_submit_button("Analyze")
 
 # Process the form submission outside the form context
 if submit_button and screen_name:
@@ -90,19 +89,19 @@ if submit_button and screen_name:
         for tweet_id, tweet_data in tweets_data.items():
             if len(tweet_data.get('comments', [])) == 0:
                 if last_tweet_id == tweet_id:
-                    st.warning("Aucun tweet trouvé avec un commentaire.")
+                    st.warning("No tweet found with a comment.")
                 continue
     
             # Initialize sentiment analyzer
             try:        
                 # Display the tweet with the most comments
-                st.header(f"Tweet le plus récent")
+                st.header(f"Most recent tweet")
                 st.markdown(f"**Tweet:** {tweets_data[tweet_id]['full_text']}")
                     
                 # Analyze sentiment of comments
                 comments = tweets_data[tweet_id].get('comments', [])
                     
-                with st.spinner("Analyse du sentiment des commentaires..."):
+                with st.spinner("Analyzing comment sentiment..."):
 
                     # Clean empty texts
                     comments = [comment for comment in comments if comment.strip()]
@@ -117,7 +116,7 @@ if submit_button and screen_name:
                             sentiment_counts[sentiment] += 1
                         
                     # Display sentiment distribution
-                    st.subheader("📊 Distribution des sentiments")
+                    st.subheader("📊 Sentiments Distribution")
                         
                     # Create a DataFrame for the pie chart
                     sentiment_df = pd.DataFrame({
@@ -136,12 +135,12 @@ if submit_button and screen_name:
                         names='Sentiment',
                         color='Sentiment',
                         color_discrete_map=color_map,
-                        title='Distribution des sentiments dans les commentaires'
+                        title='Sentiments Distribution in Comments'
                     )
                     st.plotly_chart(fig)
                         
                     # Display comments with sentiment
-                    st.subheader("Analyse des commentaires")
+                    st.subheader("Comments Analysis")
                         
                     # Create a DataFrame with comments and their sentiment
                     comments_df = pd.DataFrame({
@@ -176,7 +175,7 @@ if submit_button and screen_name:
                     
                     csv_data = download_df.to_csv(index=False)
                     st.download_button(
-                        label="Télécharger l'analyse en CSV",
+                        label="Download analysis as CSV",
                         data=csv_data,
                         file_name=f"{screen_name}_comment_sentiment_analysis.csv",
                         mime="text/csv"
@@ -184,5 +183,5 @@ if submit_button and screen_name:
                     break
 
             except Exception as e:
-                st.error(f"Erreur lors du chargement du modèle: {e}")
+                st.error(f"Error loading the model: {e}")
                 logging.error(f"Error loading sentiment model: {e}")
