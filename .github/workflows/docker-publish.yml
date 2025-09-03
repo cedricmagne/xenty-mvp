@@ -64,9 +64,9 @@ jobs:
   
             echo "🚀 Starting new container..."
             docker run -d \
-              --name xenty \
-              --env-file $HOME/xenty/.env \
+              --name xenty-mvp \
+              --env-file $HOME/xenty-mvp/.env \
               --network caddy_proxy \
               --restart unless-stopped \
-              -v $HOME/xenty/data:/app/data \
+              -v $HOME/xenty-mvp/data:/app/data \
               ghcr.io/${{ github.repository }}:latest
