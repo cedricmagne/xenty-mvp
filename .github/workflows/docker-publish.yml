@@ -57,7 +57,7 @@ jobs:
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
   
             echo "🛑 Stopping existing container (if any)..."
-            docker stop xenty || true && docker rm xenty || true
+            docker stop xenty-mvp || true && docker rm xenty-mvp || true
   
             echo "⬇️ Pulling latest image..."
             docker pull ghcr.io/${{ github.repository }}:latest
