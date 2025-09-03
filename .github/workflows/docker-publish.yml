@@ -66,7 +66,7 @@ jobs:
             docker run -d \
               --name xenty-mvp \
               --env-file $HOME/xenty-mvp/.env \
-              --network caddy_proxy \
+              --network caddy \
               --restart unless-stopped \
               -v $HOME/xenty-mvp/data:/app/data \
               ghcr.io/${{ github.repository }}:latest
